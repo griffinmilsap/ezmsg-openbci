@@ -25,27 +25,27 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser(
-        description='OpenBCI Joystick Recording Script'
+        description='ezmsg.openbci test script'
     )
 
     parser.add_argument(
         '--device',
         type=str,
-        help='Serial port to pull data from',
+        help='serial port to pull data from',
         default='simulator'
     )
 
     parser.add_argument(
         '--blocksize',
         type=int,
-        help='Sample block size @ 500 Hz',
+        help='sample block size @ 500 Hz',
         default=50
     )
 
     parser.add_argument(
         '--poll',
         type=float,
-        help='Poll Rate (Hz). 0 for auto-config',
+        help='poll Rate (Hz). 0 for auto-config',
         default=0.0
     )
 

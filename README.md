@@ -3,7 +3,7 @@
 OpenBCI Cyton serial interface for `ezmsg`
 
 ## Installation
-`pip install ezmsg-openbci @ git+https://github.com/griffinmilsap/ezmsg-openbci`
+`pip install ezmsg-openbci@git+https://github.com/griffinmilsap/ezmsg-openbci`
 
 Or, just grab `ezmsg/openbci/__init__.py` and drop it in your project; it is only one file.
 
