@@ -263,10 +263,6 @@ class OpenBCISerial(ez.Unit):
 
             yield (self.OUTPUT_SIGNAL, out_msg)
 
-    @ez.main
-    def dummy(self):
-        ...
-
 
 class OpenBCIControllerSettings(ez.Settings):
     ch_config: OpenBCIChannelConfigSettings
@@ -415,4 +411,9 @@ class OpenBCISource(ez.Collection):
             (self.SERIAL.OUTPUT_STATUS, self.OUTPUT_STATUS),
             (self.SERIAL.OUTPUT_STATUS, self.CONTROLLER.INPUT_STATUS),
             (self.CONTROLLER.OUTPUT_BYTES, self.SERIAL.INPUT_BYTES),
+        )
+    
+    def process_components(self) -> Tuple[ ez.Component, ... ]:
+        return (
+            self.SERIAL
         )
