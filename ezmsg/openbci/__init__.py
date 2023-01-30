@@ -415,5 +415,5 @@ class OpenBCISource(ez.Collection):
     
     def process_components(self) -> Tuple[ ez.Component, ... ]:
         return (
-            self.SERIAL
+            self.SERIAL,
         )
