@@ -1,6 +1,6 @@
 import ezmsg.core as ez
 
-from ezmsg.openbci import OpenBCISource, OpenBCISourceSettings
+from ezmsg.openbci.components import OpenBCISource, OpenBCISourceSettings
 
 from ezmsg.testing.debuglog import DebugLog
 
