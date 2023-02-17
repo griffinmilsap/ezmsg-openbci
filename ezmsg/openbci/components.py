@@ -10,14 +10,19 @@ import numpy as np
 import numpy.typing as npt
 
 import ezmsg.core as ez
-from ezmsg.util.messages import AxisArray, time_axis, CategoricalAxis, DimensionalAxis
+from ezmsg.util.messages.axisarray import AxisArray
 from ezmsg.sigproc.window import WindowSettings, Window
 
 from typing import (
     Optional,
     Tuple,
-    AsyncGenerator
+    AsyncGenerator,
+    List
 )
+
+@dataclass
+class OpenBCIEEGMessage(AxisArray):
+    ch_names: List[Optional[str]] = field(default_factory=list)
 
 
 class PowerStatus(Enum):
@@ -259,18 +264,16 @@ class OpenBCISerial(ez.Unit):
 
             cur_signal = cur_signal[:, enabled_channels]
 
-            out_msg = AxisArray( 
+            out_msg = OpenBCIEEGMessage( 
                 cur_signal, 
                 dims = ['time', 'ch'], 
                 axes = dict( 
-                    time = time_axis( 
+                    time = AxisArray.Axis.TimeAxis( 
                         fs = self.SETTINGS.sampling_rate, 
                         offset = time.time()
                     ),
-                    ch = CategoricalAxis(
-                        labels = ch_names
-                    )
-                )
+                ),
+                ch_names = ch_names
             )
 
             yield (self.OUTPUT_SIGNAL, out_msg)
@@ -346,17 +349,15 @@ class OpenBCIImpedance(ez.Unit):
         axis_name = self.SETTINGS.time_axis
         if axis_name is None:
             axis_name = message.dims[0]
-        axis_idx = message.get_axis_num(axis_name)
-        axis = message.axes.get(axis_name, None)
-
-        fs = 1.0 / axis.gain if isinstance(axis, DimensionalAxis) else 1.0
+        axis_idx = message.get_axis_idx(axis_name)
+        axis = message.get_axis(axis_name)
+        fs = 1.0 / axis.gain
 
         if self.SETTINGS.enable:
 
             n_time = message.data.shape[axis_idx]
             window = np.hamming(n_time)
 
-            # TODO: Assumes time_dim is 0 and ch_dim is 1
             view = np.moveaxis(message.data, axis_idx, -1)
             fft = np.fft.fft((view * window)) / n_time  # ch x freq
             freqs = np.fft.fftfreq(n_time, d=1.0 / fs)
