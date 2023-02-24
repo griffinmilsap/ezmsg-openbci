@@ -256,13 +256,11 @@ class OpenBCISerial(ez.Unit):
                 len(self.SETTINGS.ch_config.ch_setting) + 1
             ))
 
-            # TODO: Check count for lost packets
-
             cur_signal = calibrate(data[:, 1:])  # time x channel
-
-            # TODO: remove power-down channels
-
             cur_signal = cur_signal[:, enabled_channels]
+
+            # axis offset corresponds to sample[0]
+            offset_adj = cur_signal.shape[0] / self.SETTINGS.sampling_rate
 
             out_msg = OpenBCIEEGMessage( 
                 cur_signal, 
@@ -270,7 +268,7 @@ class OpenBCISerial(ez.Unit):
                 axes = dict( 
                     time = AxisArray.Axis.TimeAxis( 
                         fs = self.SETTINGS.sampling_rate, 
-                        offset = time.time()
+                        offset = time.time() - offset_adj
                     ),
                 ),
                 ch_names = ch_names
