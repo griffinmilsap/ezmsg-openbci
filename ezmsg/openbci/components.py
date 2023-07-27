@@ -3,6 +3,8 @@ import time
 
 from dataclasses import dataclass, field
 from enum import Enum
+from ezmsg.core.collection import NetworkDefinition
+from ezmsg.core.settings import Settings
 
 import serial
 
@@ -11,6 +13,7 @@ import numpy.typing as npt
 
 import ezmsg.core as ez
 from ezmsg.util.messages.axisarray import AxisArray
+from ezmsg.util.messagequeue import MessageQueue, MessageQueueSettings
 from ezmsg.sigproc.window import WindowSettings, Window
 
 from typing import (
@@ -139,7 +142,7 @@ class OpenBCISerialState(ez.State):
     )
 
 
-class OpenBCISerial(ez.Unit):
+class OpenBCISerialInterface(ez.Unit):
 
     SETTINGS: OpenBCISerialSettings
     STATE: OpenBCISerialState
@@ -275,6 +278,28 @@ class OpenBCISerial(ez.Unit):
             )
 
             yield (self.OUTPUT_SIGNAL, out_msg)
+
+class OpenBCISerial(ez.Collection):
+
+    SETTINGS: OpenBCISerialSettings
+
+    INPUT_BYTES = ez.InputStream(bytes)
+    OUTPUT_SIGNAL = ez.OutputStream(AxisArray)
+    OUTPUT_STATUS = ez.OutputStream(OpenBCISerialStatus)
+
+    INTERFACE = OpenBCISerialInterface()
+    QUEUE = MessageQueue()
+
+    def configure(self) -> None:
+        self.INTERFACE.apply_settings(self.SETTINGS)
+
+    def network(self) -> ez.NetworkDefinition:
+        return (
+            (self.INPUT_BYTES, self.INTERFACE.INPUT_BYTES),
+            (self.INTERFACE.OUTPUT_SIGNAL, self.QUEUE.INPUT),
+            (self.QUEUE.OUTPUT, self.OUTPUT_SIGNAL),
+            (self.INTERFACE.OUTPUT_STATUS, self.OUTPUT_STATUS)
+        )
 
 
 class OpenBCIControllerSettings(ez.Settings):
